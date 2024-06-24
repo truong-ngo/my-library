@@ -1,0 +1,18 @@
+{
+    "ruleName": "Employee validation",
+    "combineType": "AND",
+    "subRules": [
+        {
+            "ruleName": "Employee's name validation",
+            "fieldName": "name",
+            "message": "name must be not null",
+            "ruleExpression": "name != null"
+        },
+        {
+            "ruleName": "Employee's age validation",
+            "fieldName": "age",
+            "message": "age must be not null and between 18 and 60",
+            "ruleExpression": "age != null && age >= 18 && age <= 60"
+        }
+    ]
+}

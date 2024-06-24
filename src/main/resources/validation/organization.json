@@ -1,0 +1,54 @@
+{
+    "ruleName": "Organization validation",
+    "combineType": "AND",
+    "subRules": [
+        {
+            "combineType": "OR",
+            "fieldName": "organization",
+            "subRules": [
+                {
+                    "ruleName": "Organization's name validation",
+                    "fieldName": "orgName",
+                    "message": "orgName must be not null",
+                    "ruleExpression": "orgName != null"
+                },
+                {
+                    "ruleName": "Organization's code validation",
+                    "fieldName": "orgCode",
+                    "message": "orgCode must be not null",
+                    "ruleExpression": "orgCode != null"
+                }
+            ]
+        },
+        {
+            "ruleName": "Organization's tax code validation",
+            "fieldName": "taxCode",
+            "message": "taxCode must be not null",
+            "ruleExpression": "taxCode != null"
+        },
+        {
+            "ruleName": "Organization's address validation",
+            "fieldName": "address",
+            "message": "address must be not null",
+            "ruleExpression": "address != null"
+        },
+        {
+            "ruleName": "Organization's departments validation",
+            "combineType": "AND",
+            "subRules": [
+                {
+                    "fieldName": "departments",
+                    "message": "departments must be not null and departments size >= 1",
+                    "ruleExpression": "departments != null && departments.size() >= 1"
+                },
+                {
+                    "ruleName": "Department validation",
+                    "fieldName": "departments",
+                    "condition": "departments != null && departments.size() >= 1",
+                    "isArray": true,
+                    "arrayElementConfigPath": "validation/department.json"
+                }
+            ]
+        }
+    ]
+}
