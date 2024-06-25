@@ -18,7 +18,7 @@ public class RuleConfiguration {
     private String ruleName;
 
     /**
-     * Indicate object's field that need to be validate
+     * Indicate object's field that need to be validated
      * */
     private String fieldName;
 
@@ -107,10 +107,6 @@ public class RuleConfiguration {
 
         public boolean isAnd() {
             return this.equals(AND);
-        }
-
-        public boolean isOr() {
-            return this.equals(OR);
         }
         public boolean isCondition() {
             return this.equals(CONDITION);

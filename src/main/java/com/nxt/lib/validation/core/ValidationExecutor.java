@@ -23,12 +23,12 @@ public class ValidationExecutor {
     private final RuleConfiguration configuration;
 
     /**
-     * Object need to be validate
+     * Object need to be validated
      * */
     private final Object context;
 
     /**
-     * Constructor base on classpath of validation json file and object need to be validate
+     * Constructor base on classpath of validation json file and object need to be validated
      * */
     public ValidationExecutor(RuleConfiguration ruleConfiguration, Object context) {
         this.configuration = ruleConfiguration;
@@ -120,7 +120,7 @@ public class ValidationExecutor {
                 .map(r -> new ValidationExecutor(r, context).validate()).toList();
         if (configuration.getCombineType().isAnd() || configuration.getCombineType().isCondition()) {
             result = results.stream().allMatch(ValidationResult::isValid);
-            return getValidationResult(results, result);
+            return getConjunctionValidationResult(results, result);
         } else {
             result = results.stream().anyMatch(ValidationResult::isValid);
             Map<String, Object> subMessage = result ? null : results.stream()
@@ -165,10 +165,14 @@ public class ValidationExecutor {
             }
         }
         boolean isValid = results.stream().allMatch(ValidationResult::isValid);
-        return getValidationResult(results, isValid);
+        return getConjunctionValidationResult(results, isValid);
     }
 
-    private ValidationResult getValidationResult(List<ValidationResult> results, boolean isValid) {
+    /**
+     * Conjunction validation result<br/>
+     * Use for array & AND case
+     * */
+    private ValidationResult getConjunctionValidationResult(List<ValidationResult> results, boolean isValid) {
         Map<String, Object> message = isValid ? null : results.stream()
                 .filter(vr -> !vr.isValid())
                 .flatMap(vr -> vr.getMessages().entrySet().stream())

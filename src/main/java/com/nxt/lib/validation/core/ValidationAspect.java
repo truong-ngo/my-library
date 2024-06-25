@@ -17,7 +17,8 @@ import java.lang.reflect.Method;
 public class ValidationAspect {
 
     /**
-     * Entry point that read annotated method and parameter need to be validated
+     * Entry point that intercept method annotated with validation annotation
+     * @throws ValidationException if method parameter is invalid
      * */
     @Before("@annotation(com.nxt.lib.validation.core.Validated)")
     public void validate(JoinPoint joinPoint) {
@@ -31,6 +32,7 @@ public class ValidationAspect {
                 if (annotation instanceof Valid validAnnotation) {
                     String path = validAnnotation.rule();
                     RuleConfiguration rule = ValidationExecutor.getRuleConfiguration(path);
+                    rule.checkFormat();
                     ValidationResult result = new ValidationExecutor(rule, args[i]).validate();
                     if (!result.isValid()) {
                         throw new ValidationException(result.getMessages());
