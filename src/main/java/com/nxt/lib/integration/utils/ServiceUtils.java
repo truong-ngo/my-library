@@ -29,6 +29,6 @@ public class ServiceUtils implements ApplicationContextAware {
      * @return Object service
      * */
     public static Object getServiceAsObject(Class<?> clazz) {
-        return applicationContext.getBean(clazz);
+        return getService(clazz);
     }
 }
