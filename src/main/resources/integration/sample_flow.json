@@ -2,6 +2,7 @@
     "preCall": {
         "serviceType": "com.nxt.lib.integration.demo.DemoIntegrationService",
         "methodName": "getUserFromHeader",
+        "methodSignature": "getUserFromHeader",
         "parametersType": ["java.lang.String"],
         "paramsConfig": [
             {
@@ -36,6 +37,7 @@
                 {
                     "serviceType": "com.nxt.lib.integration.demo.DemoIntegrationService",
                     "methodName": "saveExceptionLog",
+                    "methodSignature": "saveExceptionLog",
                     "parametersType": ["org.springframework.web.client.RestClientException"],
                     "paramsConfig": [
                         {
