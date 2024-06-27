@@ -33,11 +33,10 @@ public class MethodExecutor {
      * @return result of method invocation
      */
     public MethodInvocationResult invokeMethod(ValueSource source) {
-        if (source.containsMethod(config.getMethodName())) {
-            return source.getMethodResult(config.getMethodName());
-        }
+
         Object returnObject = null;
         Exception exception = null;
+
         try {
             Class<?> serviceType = getServiceType(config);
             Object serviceInstance = ServiceUtils.getServiceAsObject(serviceType);
@@ -52,18 +51,22 @@ public class MethodExecutor {
             log.info("Exception occur: {}", e.getMessage());
             exception = e;
         }
+
         MethodInvocationResult result = new MethodInvocationResult(returnObject, exception);
-        source.cacheMethodResult(config.getMethodName(), result);
+        source.cacheMethodResult(config.getMethodSignature(), result);
+
         if (config.getExceptionHandler() != null) {
             MethodExecutor handler = new MethodExecutor(config.getExceptionHandler());
             handler.invokeMethod(source);
         }
+
         List<MethodConfiguration> nextMethods = config.getNextMethods();
         if (nextMethods == null || nextMethods.size() == 0) {
             return result;
         }
+
         for (MethodConfiguration nextMethod : nextMethods) {
-            Boolean condition = extractCondition(nextMethod.getInvokeCondition(), source);
+            Boolean condition = IntegrationUtils.extractCondition(nextMethod.getInvokeCondition(), source);
             if (condition) {
                 MethodExecutor nextMethodExecutor = new MethodExecutor(nextMethod);
                 return nextMethodExecutor.invokeMethod(source);
@@ -131,15 +134,5 @@ public class MethodExecutor {
             parameters[cfg.getParamIndex()] = param;
         }
         return parameters;
-    }
-
-    /**
-     * Extract condition that decide what next method is going to be executed
-     * */
-    private Boolean extractCondition(String invokeCondition, ValueSource source) {
-        if (invokeCondition == null) {
-            return true;
-        }
-        return IntegrationUtils.extractValue(invokeCondition, source, Boolean.class);
     }
 }

@@ -1,6 +1,7 @@
 package com.nxt.lib.integration.utils;
 
 import com.nxt.lib.integration.IntegrationException;
+import com.nxt.lib.integration.ValueSource;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -48,5 +49,17 @@ public class IntegrationUtils {
         } catch (ParseException | EvaluationException | IllegalAccessError exception) {
             throw new IntegrationException("Invalid expression string: " + expression, exception);
         }
+    }
+
+    /**
+     * Extract condition that decide what next method / api is going to be executed
+     * @param invokeCondition: expression that indicate condition
+     * @param source: context to extraction
+     * */
+    public static Boolean extractCondition(String invokeCondition, ValueSource source) {
+        if (invokeCondition == null) {
+            return true;
+        }
+        return extractValue(invokeCondition, source, Boolean.class);
     }
 }

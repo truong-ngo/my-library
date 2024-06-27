@@ -23,7 +23,7 @@
         {
             "apiConfig": {
                 "apiName": "getDepartmentByDepartmentCode",
-                "url": "http://localhost:8080/api/departmentsaaa/{code}",
+                "url": "http://localhost:8080/api/departments/{code}",
                 "method": "GET",
                 "headers": {
                     "Authorization": "'Bearer ' + getApiResponse('getToken').response.body.get('token')"

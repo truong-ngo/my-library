@@ -1,6 +1,5 @@
 package com.nxt.lib.integration.api;
 
-import com.nxt.lib.integration.IntegrationException;
 import com.nxt.lib.integration.ValueSource;
 import com.nxt.lib.integration.method.MethodConfiguration;
 import com.nxt.lib.integration.method.MethodExecutor;
@@ -32,33 +31,38 @@ public class ApiFlowExecutor {
      * @return {@link ApiResponse} instance
      * */
     public ApiResponse executeApiFlow(ValueSource source) {
-        if (source.containsApi(configuration.getApiConfig().getApiName())) {
-            return source.getApiResponse(configuration.getApiConfig().getApiName());
-        }
+
         if (configuration.getPreCall() != null) {
-            MethodExecutor preCallExecutor = new MethodExecutor(configuration.getPreCall());
-            preCallExecutor.invokeMethod(source);
+            if (IntegrationUtils.extractCondition(configuration.getPreCall().getInvokeCondition(), source)) {
+                MethodExecutor preCallExecutor = new MethodExecutor(configuration.getPreCall());
+                preCallExecutor.invokeMethod(source);
+            }
         }
+
         ApiRequest<Object> request = toHttpRequest(configuration.getApiConfig(), source);
         ApiResponse response = DynamicApiClient.callApi(request);
         source.cacheApiResult(configuration.getApiConfig().getApiName(), response);
+
         if (configuration.getResponseHandlers() != null && !configuration.getResponseHandlers().isEmpty()) {
             for (MethodConfiguration handler : configuration.getResponseHandlers()) {
-                if (handler.getInvokeCondition() != null && IntegrationUtils.extractValue(handler.getInvokeCondition(), source, Boolean.class)) {
+                if (IntegrationUtils.extractCondition(handler.getInvokeCondition(), source)) {
                     MethodExecutor handlerExecutor = new MethodExecutor(handler);
                     handlerExecutor.invokeMethod(source);
                 }
             }
         }
+
         if (configuration.getNextStep() == null || configuration.getNextStep().isEmpty()) {
             return response;
         }
+
         for (ApiFlowConfiguration nextStep : configuration.getNextStep()) {
-            if (nextStep.getCallCondition() == null || IntegrationUtils.extractValue(nextStep.getCallCondition(), source, Boolean.class)) {
+            if (IntegrationUtils.extractCondition(nextStep.getCallCondition(), source)) {
                 ApiFlowExecutor nextStepExecutor = new ApiFlowExecutor(nextStep);
                 return nextStepExecutor.executeApiFlow(source);
             }
         }
+
         return response;
     }
 
@@ -96,5 +100,4 @@ public class ApiFlowExecutor {
                 .body(body)
                 .build();
     }
-
 }

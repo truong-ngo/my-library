@@ -16,6 +16,11 @@ public class MethodConfiguration {
     private String serviceType;
 
     /**
+     * Indicate method signature (unique identifier of method)
+     * */
+    private String methodSignature;
+
+    /**
      * Indicate method name
      * */
     private String methodName;
