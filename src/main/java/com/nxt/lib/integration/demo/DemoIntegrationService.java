@@ -3,7 +3,6 @@ package com.nxt.lib.integration.demo;
 import com.nxt.lib.integration.api.ApiException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
 
 import java.util.Map;
 

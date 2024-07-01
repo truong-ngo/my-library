@@ -32,7 +32,7 @@ public class IntegrationExecutor {
      * <p>
      *     Execute the integration flow and return the last operation<br/>
      *     If the next step is cannot be invoked then return the last operation in step<br/>
-     *     The last step is indicate as rule below: <br/>
+     *     The last operation in step is indicate as rule below: <br/>
      *     <ul>
      *         <li>If process has invokable next step, return the invoke next step</li>
      *         <li>If only pre call can be invokable and api and handler process cannot be invoke, return the result of pre call</li>

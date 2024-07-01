@@ -14,6 +14,7 @@ import java.util.Map;
 
 /**
  * Method executor in integration process
+ * @author Truong Ngo
  * */
 @Slf4j
 @AllArgsConstructor
@@ -56,7 +57,7 @@ public class MethodExecutor {
                 Boolean condition = IntegrationUtils.getCondition(nextMethod.getInvokeCondition(), source);
                 if (condition) {
                     MethodExecutor nextMethodExecutor = new MethodExecutor(nextMethod);
-                    nextMethodExecutor.invokeMethod(source);
+                    return nextMethodExecutor.invokeMethod(source);
                 }
             }
         }

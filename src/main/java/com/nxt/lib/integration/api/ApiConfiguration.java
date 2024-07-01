@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.Map;
 
 /**
- * Configuration for api
+ * Configuration for api calling
  * @author Truong Ngo
  * */
 @Data

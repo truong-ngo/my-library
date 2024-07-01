@@ -1,7 +1,7 @@
 package com.nxt.lib.integration.method;
 
 /**
- * A checked exception that wraps an exception thrown by an invoked method.
+ * A checked exception that wraps an exception thrown during method invocation.
  * @see MethodExecutor
  * @author Truong Ngo
  * */

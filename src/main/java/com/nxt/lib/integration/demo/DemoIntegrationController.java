@@ -4,7 +4,6 @@ import com.nxt.lib.integration.IntegrationExecutor;
 import com.nxt.lib.integration.IntegrationConfiguration;
 import com.nxt.lib.integration.IntegrationResult;
 import com.nxt.lib.integration.ValueSource;
-import com.nxt.lib.integration.api.ApiResponse;
 import com.nxt.lib.integration.utils.IntegrationUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

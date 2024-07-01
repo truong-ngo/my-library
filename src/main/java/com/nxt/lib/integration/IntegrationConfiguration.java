@@ -2,7 +2,6 @@ package com.nxt.lib.integration;
 
 import com.nxt.lib.integration.api.ApiConfiguration;
 import com.nxt.lib.integration.method.MethodConfiguration;
-import com.nxt.lib.integration.utils.IntegrationUtils;
 import lombok.Data;
 
 import java.util.List;

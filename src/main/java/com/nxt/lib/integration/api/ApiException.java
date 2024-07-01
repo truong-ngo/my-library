@@ -1,7 +1,7 @@
 package com.nxt.lib.integration.api;
 
 /**
- * A checked exception that wraps an exception thrown by a called api.
+ * A checked exception that wraps an exception thrown during the api execution.
  * @see ApiExecutor
  * @author Truong Ngo
  * */
