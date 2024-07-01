@@ -1,8 +1,8 @@
 package com.nxt.lib.integration.demo;
 
+import com.nxt.lib.integration.api.ApiException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
 
 import java.util.Map;
 
@@ -15,8 +15,8 @@ public class DemoIntegrationService {
         return Map.of("name", data[0], "pw", data[1]);
     }
 
-    public void saveExceptionLog(RestClientException e) {
-        log.info("persist exception with message: {} to database", e.getMessage());
-        System.out.println(e.getMessage());
+    public void saveExceptionLog(ApiException e) {
+        log.info("persist exception with message: {} to database", e.getCause().getMessage());
+        System.out.println(e.getCause().getMessage());
     }
 }

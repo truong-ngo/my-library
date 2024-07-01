@@ -1,0 +1,60 @@
+{
+    "preApiCallHandler": {
+        "serviceType": "com.nxt.lib.integration.demo.DemoIntegrationService",
+        "methodName": "getUserFromHeader",
+        "methodSignature": "getUserFromHeader",
+        "parametersType": ["java.lang.String"],
+        "paramsConfig": {
+            "0": "input.get('basic')"
+        }
+    },
+    "apiConfig": {
+        "apiName": "getToken",
+        "url": "http://localhost:8080/api/token",
+        "method": "POST",
+        "body": {
+            "username": "getMethodResult('getUserFromHeader').result.get('name')",
+            "password": "getMethodResult('getUserFromHeader').result.get('pw')"
+        }
+    },
+    "nextSteps": [
+        {
+            "apiConfig": {
+                "apiName": "getDepartmentByDepartmentCode",
+                "url": "http://localhost:8080/api/departments/{code}",
+                "method": "GET",
+                "headers": {
+                    "Authorization": "'Bearer ' + getApiResponse('getToken').response.body.get('token')"
+                },
+                "pathVariables": {
+                    "code": "input.get('departmentCode')"
+                }
+            },
+            "responseHandlers": [
+                {
+                    "serviceType": "com.nxt.lib.integration.demo.DemoIntegrationService",
+                    "methodName": "saveExceptionLog",
+                    "methodSignature": "saveExceptionLog",
+                    "parametersType": ["org.springframework.web.client.RestClientException"],
+                    "paramsConfig": {
+                        "0": "getApiResponse('getDepartmentByDepartmentCode').exception"
+                    },
+                    "invokeCondition": "getApiResponse('getDepartmentByDepartmentCode').exception != null"
+                }
+            ],
+            "nextSteps": [
+                {
+                    "executeCondition": "getApiResponse('getDepartmentByDepartmentCode').response != null && getApiResponse('getDepartmentByDepartmentCode').response.body != null",
+                    "apiConfig": {
+                        "apiName": "getProjectByDepartmentId",
+                        "url": "http://localhost:8080/api/projects",
+                        "method": "GET",
+                        "queryParams": {
+                            "departmentId": "getApiResponse('getDepartmentByDepartmentCode').response.body.get('id')"
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -8,7 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Indicate source value for extract operation during the integration process
+ * Indicate source value for extraction during the integration process
+ * @author Truong Ngo
  * */
 @Data
 public class ValueSource {
@@ -38,6 +39,8 @@ public class ValueSource {
 
     /**
      * Cache api call result in integration process
+     * @param apiName: name of api
+     * @param result: result of api call process
      * */
     public void cacheApiResult(String apiName, ApiResponse result) {
         apiCache.put(apiName, result);
@@ -45,20 +48,24 @@ public class ValueSource {
 
     /**
      * Cache method call result in integration process
+     * @param methodSignature: method unique identity (signature)
+     * @param result: method invocation result
      * */
-    public void cacheMethodResult(String methodName, MethodInvocationResult result) {
-        methodCache.put(methodName, result);
+    public void cacheMethodResult(String methodSignature, MethodInvocationResult result) {
+        methodCache.put(methodSignature, result);
     }
 
     /**
      * Check of method call is already in cache
+     * @param methodSignature: method identifier
      * */
-    public boolean containsMethod(String methodName) {
-        return methodCache.containsKey(methodName);
+    public boolean containsMethod(String methodSignature) {
+        return methodCache.containsKey(methodSignature);
     }
 
     /**
      * Check of api call is already in cache
+     * @param apiName: api unique name
      * */
     public boolean containsApi(String apiName) {
         return apiCache.containsKey(apiName);
@@ -66,15 +73,15 @@ public class ValueSource {
 
     /**
      * Get method result in cache
-     * @param methodName: method name
+     * @param methodSignature: method unique identifier
      * */
-    public MethodInvocationResult getMethodResult(String methodName) {
-        return methodCache.get(methodName);
+    public MethodInvocationResult getMethodResult(String methodSignature) {
+        return methodCache.get(methodSignature);
     }
 
     /**
      * Get api response in cache
-     * @param apiName: api name
+     * @param apiName: api unique name
      * */
     public ApiResponse getApiResponse(String apiName) {
         return apiCache.get(apiName);
