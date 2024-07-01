@@ -5,10 +5,16 @@ import lombok.Data;
 import java.util.Map;
 
 /**
- * Configuration for api calling
+ * Configuration for api
+ * @author Truong Ngo
  * */
 @Data
 public class ApiConfiguration {
+
+    /**
+     * Api call condition
+     * */
+    private String callCondition;
 
     /**
      * Indicate api name, use as api cache key
@@ -26,30 +32,34 @@ public class ApiConfiguration {
     private String method;
 
     /**
-     * Path variable config<br/>
+     * Path variable value configuration
+     * <p>
      * Key: the name of path variable<br/>
      * Value: expression to extract value from sources
+     * </p>
      * */
     private Map<String, String> pathVariables;
 
     /**
-     * Query param config<br/>
+     * Query param value configuration
+     * <p>
      * Key: the name of query param<br/>
      * Value: expression to extract value from sources
+     * </p>
      * */
     private Map<String, String> queryParams;
 
     /**
-     * Header config<br/>
+     * Header value configuration
+     * <p>
      * Key: the name of header variable<br/>
      * Value: expression to extract value from sources
+     * </p>
      * */
     private Map<String, String> headers;
 
     /**
-     * Body config<br/>
-     * Key: attribute of body<br/>
-     * Value: expression to extract value from sources
+     * Body value configuration
      * */
-    private Map<String, String> body;
+    private Object body;
 }

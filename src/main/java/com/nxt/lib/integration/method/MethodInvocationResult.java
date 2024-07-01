@@ -6,6 +6,6 @@ package com.nxt.lib.integration.method;
  * @param result    Method call result
  * @param exception Exception occur during method invocation
  */
-public record MethodInvocationResult(Object result, Exception exception) {
+public record MethodInvocationResult(Object result, MethodInvocationException exception) {
 
 }

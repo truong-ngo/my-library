@@ -4,28 +4,25 @@ import com.nxt.lib.integration.IntegrationException;
 import com.nxt.lib.integration.ValueSource;
 import com.nxt.lib.integration.utils.IntegrationUtils;
 import com.nxt.lib.integration.utils.ServiceUtils;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Method executor in integration process
  * */
 @Slf4j
+@AllArgsConstructor
 public class MethodExecutor {
 
     /**
      * Method configuration
      * */
     private final MethodConfiguration config;
-
-    public MethodExecutor(MethodConfiguration config) {
-        this.config = config;
-    }
 
     /**
      * Execute method in integration process
@@ -34,44 +31,36 @@ public class MethodExecutor {
      */
     public MethodInvocationResult invokeMethod(ValueSource source) {
 
-        Object returnObject = null;
-        Exception exception = null;
+        Object returnObject = null; MethodInvocationException exception = null;
 
         try {
             Class<?> serviceType = getServiceType(config);
             Object serviceInstance = ServiceUtils.getServiceAsObject(serviceType);
             Method method = getMethod(serviceType, config);
             if (method.getParameterCount() > 0) {
-                Object[] parameters = extractMethodParameter(method, config.getParamsConfig(), source);
+                Object[] parameters = extractMethodParameters(method, config.getParamsConfig(), source);
                 returnObject = method.invoke(serviceInstance, parameters);
             } else {
                 returnObject = method.invoke(serviceInstance);
             }
         } catch (InvocationTargetException | IllegalAccessException e) {
-            log.info("Exception occur: {}", e.getMessage());
-            exception = e;
+            log.info("Method {} has exception during the invocation: {}", config.getMethodPath(), e.getMessage());
+            exception = new MethodInvocationException(e, config.getMethodPath());
         }
 
         MethodInvocationResult result = new MethodInvocationResult(returnObject, exception);
         source.cacheMethodResult(config.getMethodSignature(), result);
 
-        if (config.getExceptionHandler() != null) {
-            MethodExecutor handler = new MethodExecutor(config.getExceptionHandler());
-            handler.invokeMethod(source);
-        }
-
-        List<MethodConfiguration> nextMethods = config.getNextMethods();
-        if (nextMethods == null || nextMethods.size() == 0) {
-            return result;
-        }
-
-        for (MethodConfiguration nextMethod : nextMethods) {
-            Boolean condition = IntegrationUtils.extractCondition(nextMethod.getInvokeCondition(), source);
-            if (condition) {
-                MethodExecutor nextMethodExecutor = new MethodExecutor(nextMethod);
-                return nextMethodExecutor.invokeMethod(source);
+        if (config.hasNextMethods()) {
+            for (MethodConfiguration nextMethod : config.getNextMethods()) {
+                Boolean condition = IntegrationUtils.getCondition(nextMethod.getInvokeCondition(), source);
+                if (condition) {
+                    MethodExecutor nextMethodExecutor = new MethodExecutor(nextMethod);
+                    nextMethodExecutor.invokeMethod(source);
+                }
             }
         }
+
         return result;
     }
 
@@ -116,22 +105,11 @@ public class MethodExecutor {
      * Get parameter value from {@link MethodConfiguration} and {@link ValueSource}
      * @return Array of parameters
      * */
-    private Object[] extractMethodParameter(Method method, List<ParameterConfiguration> configs, ValueSource source) {
+    private Object[] extractMethodParameters(Method method, Map<Integer, Object> configs, ValueSource source) {
         Object[] parameters = new Object[method.getParameterCount()];
-        Object param;
-        for (ParameterConfiguration cfg : configs) {
-            if (cfg.getSimpleExtractExpression() != null) {
-                param = IntegrationUtils.extractValue(cfg.getSimpleExtractExpression(), source);
-            } else {
-                param = cfg.getCompositeExtractExpression()
-                        .entrySet()
-                        .stream()
-                        .collect(Collectors.toMap(
-                                Map.Entry::getKey,
-                                entry -> IntegrationUtils.extractValue(entry.getKey(), source)
-                        ));
-            }
-            parameters[cfg.getParamIndex()] = param;
+        for (Map.Entry<Integer, Object> cfg : configs.entrySet()) {
+            Object param = IntegrationUtils.getValueFromConfig(cfg.getValue(), source);
+            parameters[cfg.getKey()] = param;
         }
         return parameters;
     }
