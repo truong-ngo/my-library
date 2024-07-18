@@ -1,5 +1,8 @@
 package com.nxt.lib.integration.method;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.nxt.lib.integration.OperationalConfiguration;
+import com.nxt.lib.integration.ValueSource;
 import lombok.Data;
 
 import java.util.List;
@@ -7,10 +10,11 @@ import java.util.Map;
 
 /**
  * Configuration for method that invoked in integration process
+ * @see MethodExecutor
  * @author Truong Ngo
  * */
 @Data
-public class MethodConfiguration {
+public class MethodConfiguration implements OperationalConfiguration {
 
     /**
      * Indicate service's type that have invoked method.<br/>
@@ -47,11 +51,6 @@ public class MethodConfiguration {
     private Map<Integer, Object> paramsConfig;
 
     /**
-     * Indicate next method that has to be executed
-     * */
-    private List<MethodConfiguration> nextMethods;
-
-    /**
      * Get method fully qualify path
      * <p>
      * Eg: com.nxt.utils.ClassUtils.isPrimitive(java.lang.Object)
@@ -61,11 +60,9 @@ public class MethodConfiguration {
         return String.format("%s.%s(%s)", serviceType, methodName, String.join(", ", parametersType));
     }
 
-    /**
-     * Check if method configuration has next methods
-     * @return true if nextMethods is not empty
-     * */
-    public boolean hasNextMethods() {
-        return nextMethods != null && !nextMethods.isEmpty();
+    @Override
+    @JsonIgnore
+    public String getName(ValueSource source) {
+        return methodSignature;
     }
 }

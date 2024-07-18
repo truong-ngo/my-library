@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
  * Result of integration process
  * <p>The result is the result of final operation in process that can be track
  * if error occur</p>
- * @see IntegrationExecutor
+ * @see ProcessExecutor
  * @author Truong Ngo
  * */
 @Data
