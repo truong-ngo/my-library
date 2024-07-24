@@ -7,29 +7,33 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * Define a complete integration step that include:
+ * Define a complete process include:
  * <ul>
  *   <li>Pre api call handler</li>
  *   <li>Api calling</li>
  *   <li>Response handlers</li>
- *   <li>Next integration steps</li>
  * </ul>
  * @see ApiConfiguration
  * @see MethodConfiguration
  * @author Truong Ngo
  * */
 @Data
-public class IntegrationConfiguration {
+public class ProcessConfiguration implements OperationalConfiguration {
 
     /**
-     * Execute condition of an integration step
+     * Process name
      * */
-    private String executeCondition;
+    private String processName;
+
+    /**
+     * Invoke condition of a process
+     * */
+    private String invokeCondition;
 
     /**
      * Pre api call handler's configuration
      * */
-    private MethodConfiguration preApiCallHandler;
+    private List<List<MethodConfiguration>> preApiCallHandlers;
 
     /**
      * Api configuration
@@ -39,31 +43,24 @@ public class IntegrationConfiguration {
     /**
      * Api response handler configuration
      * */
-    private List<MethodConfiguration> responseHandlers;
-
-    /**
-     * Next steps in integration process
-     * */
-    private List<IntegrationConfiguration> nextSteps;
+    private List<List<MethodConfiguration>> responseHandlers;
 
     /**
      * Check if integration step has pre handler api call operation
      * */
     public boolean hasPreApiCallHandler() {
-        return preApiCallHandler != null;
+        return preApiCallHandlers != null && !preApiCallHandlers.isEmpty();
     }
 
     /**
      * Check if integration step has handlers
      * */
     public boolean hasResponseHandlers() {
-        return responseHandlers != null && responseHandlers.size() > 0;
+        return responseHandlers != null && !responseHandlers.isEmpty();
     }
 
-    /**
-     * Check if integration step has next steps
-     * */
-    public boolean hasNextSteps() {
-        return nextSteps != null && nextSteps.size() > 0;
+    @Override
+    public String getName(ValueSource source) {
+        return null;
     }
 }

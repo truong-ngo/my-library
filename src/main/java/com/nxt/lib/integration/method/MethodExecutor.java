@@ -49,18 +49,8 @@ public class MethodExecutor {
             exception = new MethodInvocationException(e, config.getMethodPath());
         }
 
-        MethodInvocationResult result = new MethodInvocationResult(returnObject, exception);
+        MethodInvocationResult result = new MethodInvocationResult(config.getMethodSignature(), returnObject, exception);
         source.cacheMethodResult(config.getMethodSignature(), result);
-
-        if (config.hasNextMethods()) {
-            for (MethodConfiguration nextMethod : config.getNextMethods()) {
-                Boolean condition = IntegrationUtils.getCondition(nextMethod.getInvokeCondition(), source);
-                if (condition) {
-                    MethodExecutor nextMethodExecutor = new MethodExecutor(nextMethod);
-                    return nextMethodExecutor.invokeMethod(source);
-                }
-            }
-        }
 
         return result;
     }

@@ -1,20 +1,24 @@
 package com.nxt.lib.integration.api;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.nxt.lib.integration.OperationalConfiguration;
+import com.nxt.lib.integration.ValueSource;
 import lombok.Data;
 
 import java.util.Map;
 
 /**
  * Configuration for api calling
+ * @see ApiExecutor
  * @author Truong Ngo
  * */
 @Data
-public class ApiConfiguration {
+public class ApiConfiguration implements OperationalConfiguration {
 
     /**
      * Api call condition
      * */
-    private String callCondition;
+    private String invokeCondition;
 
     /**
      * Indicate api name, use as api cache key
@@ -62,4 +66,10 @@ public class ApiConfiguration {
      * Body value configuration
      * */
     private Object body;
+
+    @Override
+    @JsonIgnore
+    public String getName(ValueSource source) {
+        return apiName;
+    }
 }
