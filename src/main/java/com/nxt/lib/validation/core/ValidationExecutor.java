@@ -1,6 +1,7 @@
 package com.nxt.lib.validation.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nxt.lib.utils.IOUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
@@ -13,12 +14,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Execute validation base on defined rule
+ * Execute validation
+ * @author Truong Ngo
  * */
 public class ValidationExecutor {
 
     /**
-     * Validation rule configuration
+     * Rule configuration
      * */
     private final RuleConfiguration configuration;
 
@@ -28,25 +30,11 @@ public class ValidationExecutor {
     private final Object context;
 
     /**
-     * Constructor base on classpath of validation json file and object need to be validated
+     * Constructor base on configuration and validate object
      * */
     public ValidationExecutor(RuleConfiguration ruleConfiguration, Object context) {
         this.configuration = ruleConfiguration;
         this.context = context;
-    }
-
-    /**
-     * Get configuration from class path
-     * @param path: path to configuration file
-     * @return {@link RuleConfiguration}
-     * */
-    public static RuleConfiguration getRuleConfiguration(String path) {
-        ClassPathResource resource = new ClassPathResource(path);
-        try (InputStream in = resource.getInputStream()) {
-            return new ObjectMapper().readValue(in.readAllBytes(), RuleConfiguration.class);
-        } catch (Exception e) {
-            throw new ValidationException(Map.of("message", "error occur while reading rule configuration"));
-        }
     }
 
     /**
@@ -80,7 +68,7 @@ public class ValidationExecutor {
      * */
     public ValidationResult validate() {
         if (configuration.isArrayConfiguration()) {
-            return arrayValidate(configuration.getTargetName() + "[%d].");
+            return arrayValidate(configuration.getTarget() + "[%d].");
         } else {
             if (configuration.isBasicConfiguration()) {
                 return basicValidate();
@@ -98,14 +86,14 @@ public class ValidationExecutor {
         try {
             boolean result = Boolean.TRUE.equals(getValueFromExpression(configuration.getRuleExpression(), Boolean.class, context));
             if (!result) {
-                message.put(configuration.getTargetName(), configuration.getMessage());
+                message.put(configuration.getTarget(), configuration.getMessage());
             } else {
                 message = null;
             }
             return new ValidationResult(result, message);
         } catch (ParseException | EvaluationException | IllegalAccessError exception) {
             message = new LinkedHashMap<>();
-            message.put(configuration.getTargetName(), "invalid validation's expression");
+            message.put(configuration.getTarget(), "invalid validation's expression");
             return new ValidationResult(false, message);
         }
     }
@@ -135,7 +123,7 @@ public class ValidationExecutor {
             messages.put("condition", "At least one of these condition must match");
             messages.put("messages", subMessage);
             Map<String, Object> message = new LinkedHashMap<>();
-            message.put(configuration.getTargetName(), messages);
+            message.put(configuration.getTarget(), messages);
             return new ValidationResult(result, message);
         }
     }
@@ -145,8 +133,10 @@ public class ValidationExecutor {
      * */
     @SuppressWarnings("unchecked")
     public ValidationResult arrayValidate(String rootPath) {
-        RuleConfiguration arrayElementConfiguration = getRuleConfiguration(configuration.getArrayElementConfig());
-        List<Object> objects = (List<Object>) getValueFromExpression("#this." + configuration.getTargetName(), context);
+        RuleConfiguration arrayElementConfiguration = IOUtils
+                .getResource(configuration.getArrayElementConfig(), RuleConfiguration.class)
+                .orElseThrow(() -> new ValidationException(Map.of(configuration.getTarget(), "invalid array element config path or path not found!")));
+        List<Object> objects = (List<Object>) getValueFromExpression("#this." + configuration.getTarget(), context);
         List<ValidationResult> results = new ArrayList<>();
         for (int i = 0; i < objects.size(); i++) {
             ValidationExecutor executor = new ValidationExecutor(arrayElementConfiguration, objects.get(i));

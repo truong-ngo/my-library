@@ -33,6 +33,11 @@ public class RuleConfiguration {
      * </ul>
      * of object that need to be validated
      * */
+    private String target;
+
+    /**
+     * Display name of target;
+     * */
     private String targetName;
 
     /**
