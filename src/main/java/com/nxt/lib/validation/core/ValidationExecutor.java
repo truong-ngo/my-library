@@ -80,7 +80,7 @@ public class ValidationExecutor {
      * */
     public ValidationResult validate() {
         if (configuration.isArrayConfiguration()) {
-            return arrayValidate(configuration.getFieldName() + "[%d].");
+            return arrayValidate(configuration.getTargetName() + "[%d].");
         } else {
             if (configuration.isBasicConfiguration()) {
                 return basicValidate();
@@ -98,14 +98,14 @@ public class ValidationExecutor {
         try {
             boolean result = Boolean.TRUE.equals(getValueFromExpression(configuration.getRuleExpression(), Boolean.class, context));
             if (!result) {
-                message.put(configuration.getFieldName(), configuration.getMessage());
+                message.put(configuration.getTargetName(), configuration.getMessage());
             } else {
                 message = null;
             }
             return new ValidationResult(result, message);
         } catch (ParseException | EvaluationException | IllegalAccessError exception) {
             message = new LinkedHashMap<>();
-            message.put(configuration.getFieldName(), "invalid validation's expression");
+            message.put(configuration.getTargetName(), "invalid validation's expression");
             return new ValidationResult(false, message);
         }
     }
@@ -135,7 +135,7 @@ public class ValidationExecutor {
             messages.put("condition", "At least one of these condition must match");
             messages.put("messages", subMessage);
             Map<String, Object> message = new LinkedHashMap<>();
-            message.put(configuration.getFieldName(), messages);
+            message.put(configuration.getTargetName(), messages);
             return new ValidationResult(result, message);
         }
     }
@@ -145,8 +145,8 @@ public class ValidationExecutor {
      * */
     @SuppressWarnings("unchecked")
     public ValidationResult arrayValidate(String rootPath) {
-        RuleConfiguration arrayElementConfiguration = getRuleConfiguration(configuration.getArrayElementConfigPath());
-        List<Object> objects = (List<Object>) getValueFromExpression("#this." + configuration.getFieldName(), context);
+        RuleConfiguration arrayElementConfiguration = getRuleConfiguration(configuration.getArrayElementConfig());
+        List<Object> objects = (List<Object>) getValueFromExpression("#this." + configuration.getTargetName(), context);
         List<ValidationResult> results = new ArrayList<>();
         for (int i = 0; i < objects.size(); i++) {
             ValidationExecutor executor = new ValidationExecutor(arrayElementConfiguration, objects.get(i));

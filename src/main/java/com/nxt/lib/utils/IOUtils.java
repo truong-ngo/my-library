@@ -6,6 +6,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 /**
  * IO Utility
@@ -24,12 +25,16 @@ public class IOUtils {
      * @param path: path to resource file
      * @return desire resource
      * */
-    public static <T> T getResource(String path, Class<T> clazz) throws IOException {
-        ClassPathResource resource = new ClassPathResource(path);
-        InputStream in = resource.getInputStream();
-        T result = new ObjectMapper().readValue(in.readAllBytes(), clazz);
-        in.close();
-        return result;
+    public static <T> Optional<T> getResource(String path, Class<T> clazz) {
+        try {
+            ClassPathResource resource = new ClassPathResource(path);
+            InputStream in = resource.getInputStream();
+            T result = new ObjectMapper().readValue(in.readAllBytes(), clazz);
+            in.close();
+            return Optional.of(result);
+        } catch (IOException e) {
+            return Optional.empty();
+        }
     }
 
     /**
@@ -39,11 +44,15 @@ public class IOUtils {
      * @param path: path to resource file
      * @return desire resource
      * */
-    public static <T> T getResource(String path, TypeReference<T> type) throws IOException {
-        ClassPathResource resource = new ClassPathResource(path);
-        InputStream in = resource.getInputStream();
-        T result = new ObjectMapper().readValue(in.readAllBytes(), type);
-        in.close();
-        return result;
+    public static <T> Optional<T> getResource(String path, TypeReference<T> type) {
+        try {
+            ClassPathResource resource = new ClassPathResource(path);
+            InputStream in = resource.getInputStream();
+            T result = new ObjectMapper().readValue(in.readAllBytes(), type);
+            in.close();
+            return Optional.of(result);
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 }

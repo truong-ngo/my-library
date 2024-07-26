@@ -1,5 +1,6 @@
 package com.nxt.lib.validation.core;
 
+import com.nxt.lib.utils.IOUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -8,17 +9,22 @@ import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
- * Intercept method to perform validation
+ * Intercept method invocation to perform validation
+ * <p>
+ * The method that annotated with {@code @Validated} will be intercepted, and be validated in here
+ * @see Validated
+ * @author Truong Ngo
  * */
 @Aspect
 @Component
 public class ValidationAspect {
 
     /**
-     * Entry point that intercept method annotated with validation annotation
-     * @throws ValidationException if method parameter is invalid
+     * Entry point that intercept method annotated with {@code Validated} annotation
+     * @throws ValidationException if method parameter is validation is failed
      * */
     @Before("@annotation(com.nxt.lib.validation.core.Validated)")
     public void validate(JoinPoint joinPoint) {
@@ -31,7 +37,8 @@ public class ValidationAspect {
             for (Annotation annotation : parameterAnnotations[i]) {
                 if (annotation instanceof Valid validAnnotation) {
                     String path = validAnnotation.rule();
-                    RuleConfiguration rule = ValidationExecutor.getRuleConfiguration(path);
+                    RuleConfiguration rule = IOUtils.getResource(path, RuleConfiguration.class)
+                            .orElseThrow(() -> new ValidationException(Map.of("rulePath", "invalid rule path or rule path not found!")));
                     rule.checkFormat();
                     ValidationResult result = new ValidationExecutor(rule, args[i]).validate();
                     if (!result.isValid()) {

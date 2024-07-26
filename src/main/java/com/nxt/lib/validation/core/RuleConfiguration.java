@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Hold the validation logic of a parameter
@@ -24,23 +25,24 @@ import java.util.Map;
 public class RuleConfiguration {
 
     /**
-     * Rule name
+     * Indicate the target that need to be validated. Can be:
+     * <ul>
+     *     <li>A rule of single field</li>
+     *     <li>A group of rule</li>
+     *     <li>Conditional rule</li>
+     * </ul>
+     * of object that need to be validated
      * */
-    private String ruleName;
+    private String targetName;
 
     /**
-     * Indicate object's field that need to be validated
-     * */
-    private String fieldName;
-
-    /**
-     * Message indicate that how the field should be valid
+     * Rule message, indicate how the target should be
      * */
     private String message;
 
     /**
-     * Indicate that the validation is applied or not<br/>
-     * If the value is null then the validation will be applied
+     * A SpEl expression indicate that the validation is applied or not<br/>
+     * If the value is null or true then the validation will be applied
      * */
     private String condition;
 
@@ -51,14 +53,10 @@ public class RuleConfiguration {
     private String ruleExpression;
 
     /**
-     * Indicate that the validation field is array, list or not
+     * Indicate the configuration of array element in case field is array<br/>
+     * This is rule for array member
      * */
-    private Boolean isArray;
-
-    /**
-     * Indicate the configuration of array element in case field is array
-     * */
-    private String arrayElementConfigPath;
+    private String arrayElementConfig;
 
     /**
      * Combine type for rule in the composite form
@@ -75,26 +73,26 @@ public class RuleConfiguration {
      * */
     public boolean isBasicConfiguration() {
         return (!StringUtils.isTrimEmpty(ruleExpression)) &&
-               ((isArray == null || !isArray) && arrayElementConfigPath == null) &&
-               (combineType == null && subRules == null);
+               (Objects.isNull(arrayElementConfig)) &&
+               (Objects.isNull(combineType) && Objects.isNull(subRules));
     }
 
     /**
      * Determine if rule is in array form
      * */
     public boolean isArrayConfiguration() {
-        return (ruleExpression == null) &&
-               (isArray != null && isArray && arrayElementConfigPath != null) &&
-               (combineType == null && subRules == null);
+        return (Objects.isNull(ruleExpression)) &&
+               (Objects.nonNull(arrayElementConfig)) &&
+               (Objects.isNull(combineType) && Objects.isNull(subRules));
     }
 
     /**
      * Determine if rule is in composite form
      * */
     public boolean isCompositeConfiguration() {
-        return (ruleExpression == null) &&
-               ((isArray == null || !isArray) && arrayElementConfigPath == null) &&
-               (combineType != null && subRules != null);
+        return (Objects.isNull(ruleExpression)) &&
+               (Objects.isNull(arrayElementConfig)) &&
+               (Objects.nonNull(combineType) && Objects.nonNull(subRules));
     }
 
     /**

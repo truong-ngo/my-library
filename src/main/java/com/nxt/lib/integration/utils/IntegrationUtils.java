@@ -33,22 +33,16 @@ public class IntegrationUtils {
      * Get api flow configuration from flow file name
      * */
     public static <T> T getConfiguration(String path, Class<T> clazz) {
-        try {
-            return IOUtils.getResource(path, clazz);
-        } catch (Exception e) {
-            throw new IntegrationException("Invalid flow: " + path);
-        }
+        return IOUtils.getResource(path, clazz)
+                .orElseThrow(() -> new IntegrationException("Invalid flow: " + path));
     }
 
     /**
      * Get api flow configuration from flow file name
      * */
     public static <T> T getConfiguration(String path, TypeReference<T> type) {
-        try {
-            return IOUtils.getResource(path, type);
-        } catch (Exception e) {
-            throw new IntegrationException("Invalid flow: " + path);
-        }
+        return IOUtils.getResource(path, type)
+                .orElseThrow(() -> new IntegrationException("Invalid flow: " + path));
     }
 
     /**
