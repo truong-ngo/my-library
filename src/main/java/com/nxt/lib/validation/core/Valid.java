@@ -6,7 +6,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Declare that annotated parameter need to be validated
+ * Indicate that annotated parameter need to be validated. Usage:
+ * <blockquote><pre>
+ * {@code @Validated}
+ * public void someMethod({@code @Valid}(rule = "...rule.json")) {
+ *     method content
+ * }
+ * </pre></blockquote>
+ * @see Validated
+ * @author Truong Ngo
  * */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
