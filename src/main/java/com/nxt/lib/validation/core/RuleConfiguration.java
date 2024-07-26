@@ -1,12 +1,23 @@
 package com.nxt.lib.validation.core;
 
+import com.nxt.lib.utils.StringUtils;
 import lombok.Data;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * A rule for validating object (context)
+ * Hold the validation logic of a parameter
+ * <p>
+ * Java class model for rule configuration file define in {@code @Valid}.
+ * <p>
+ * Describe the validation logic of entire object as below:
+ * <ul>
+ *     <li>Basic case: Single field validation</li>
+ *     <li>Composite case: Group of field validation with combine operator</li>
+ *     <li>Array case: Contain the path of array element validation rule</li>
+ * </ul>
+ * @see Valid
  * @author Truong Ngo
  * */
 @Data
@@ -63,7 +74,7 @@ public class RuleConfiguration {
      * Determine if rule is in basic form
      * */
     public boolean isBasicConfiguration() {
-        return (ruleExpression != null && !ruleExpression.trim().isEmpty()) &&
+        return (!StringUtils.isTrimEmpty(ruleExpression)) &&
                ((isArray == null || !isArray) && arrayElementConfigPath == null) &&
                (combineType == null && subRules == null);
     }
