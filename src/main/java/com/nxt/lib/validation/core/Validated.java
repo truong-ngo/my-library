@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
  * the method to perform validation. If the annotated method is call directly from other
  * method in same class then the effect won't be trigger.
  * <p>
- * The validation will be triggered at {@code  ValidationAspect} and performed by {@code ValidationExecutor}
+ * The validation will be triggered at {@code ValidationAspect} and performed by {@code ValidationExecutor}
  * <p>
  * The parameter need to be validated must be annotated with {@code @Valid}
  * @see Valid
