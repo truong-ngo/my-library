@@ -8,14 +8,13 @@ import com.nxt.lib.integration.api.ApiRequest;
 import com.nxt.lib.utils.ClassUtils;
 import com.nxt.lib.utils.IOUtils;
 import com.nxt.lib.utils.SpElUtils;
-import org.springframework.expression.EvaluationException;
-import org.springframework.expression.ParseException;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -30,7 +29,11 @@ public class IntegrationUtils {
     private IntegrationUtils() {}
 
     /**
-     * Get api flow configuration from flow file name
+     * Get configuration from file path
+     * @param path path to file
+     * @param clazz desire type
+     * @return configuration of type {@code T}
+     * @throws IntegrationException if error occur
      * */
     public static <T> T getConfiguration(String path, Class<T> clazz) {
         return IOUtils.getResource(path, clazz)
@@ -38,7 +41,11 @@ public class IntegrationUtils {
     }
 
     /**
-     * Get api flow configuration from flow file name
+     * Get configuration from file path
+     * @param path path to file
+     * @param type desire generic type ({@code java.util.List}, {@code java.util.Map}...)
+     * @return configuration of type {@code T}
+     * @throws IntegrationException if path is invalid or configuration is invalid
      * */
     public static <T> T getConfiguration(String path, TypeReference<T> type) {
         return IOUtils.getResource(path, type)
@@ -50,13 +57,12 @@ public class IntegrationUtils {
      * @param expression: SpEl expression as extractor
      * @param context: context for extraction
      * @return value extracted as {@link Object} type
+     * @throws IntegrationException if path is invalid or configuration is invalid
      * */
     public static Object extractValue(String expression, Object context) {
-        try {
-            return SpElUtils.getValue(expression, context);
-        } catch (ParseException | EvaluationException | IllegalAccessError exception) {
-            throw new IntegrationException("Invalid expression string: " + expression, exception);
-        }
+        return SpElUtils.getValue(expression, context)
+                .orElseThrow(() -> new IntegrationException("Invalid expression string: " + expression));
+
     }
 
     /**
@@ -65,25 +71,21 @@ public class IntegrationUtils {
      * @param context: context for extraction
      * @param clazz: desired type
      * @return value extracted as {@link T} type
+     * @throws IntegrationException if error occur in expression parsing process
      * */
     public static <T> T extractValue(String expression, Object context, Class<T> clazz) {
-        try {
-            return SpElUtils.getValue(expression, context, clazz);
-        } catch (ParseException | EvaluationException | IllegalAccessError exception) {
-            throw new IntegrationException("Invalid expression string: " + expression, exception);
-        }
+        return SpElUtils.getValue(expression, context, clazz)
+                .orElseThrow(() -> new IntegrationException("Invalid expression string: " + expression));
     }
 
     /**
-     * Extract condition that decide what next method / api is going to be executed
+     * Extract condition that decide if the operation going to be executed
      * @param invokeCondition: expression that indicate condition
      * @param source: context to extraction
+     * @return true if invokeCondition is null or the extract value is true otherwise false
      * */
     public static Boolean getCondition(String invokeCondition, ValueSource source) {
-        if (invokeCondition == null) {
-            return true;
-        }
-        return extractValue(invokeCondition, source, Boolean.class);
+        return Objects.isNull(invokeCondition) || extractValue(invokeCondition, source, Boolean.class);
     }
 
     /**
@@ -91,8 +93,9 @@ public class IntegrationUtils {
      * @param configuration: the configuration for value of object
      * @return object value
      * */
+    @SuppressWarnings("all")
     public static Object getValueFromConfig(Object configuration, ValueSource source) {
-        if (configuration == null) {
+        if (Objects.isNull(configuration)) {
             return null;
         }
         if (ClassUtils.isPrimitive(configuration) || ClassUtils.isWrapper(configuration)) {
@@ -121,21 +124,21 @@ public class IntegrationUtils {
     public static ApiRequest<Object> getHttpRequest(ApiConfiguration configuration, ValueSource sources) {
 
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-        if (configuration.getHeaders() != null) {
-            configuration.getHeaders().forEach((k, v) -> headers.put(k, List.of((String) IntegrationUtils.extractValue(v, sources))));
+        if (Objects.nonNull(configuration.getHeaders())) {
+            configuration.getHeaders().forEach((k, v) -> headers.put(k, List.of((String) extractValue(v, sources))));
         }
 
         MultiValueMap<String, Object> queryParams = new LinkedMultiValueMap<>();
-        if (configuration.getQueryParams() != null) {
-            configuration.getQueryParams().forEach((k, v) -> queryParams.put(k, List.of(IntegrationUtils.extractValue(v, sources))));
+        if (Objects.nonNull(configuration.getQueryParams())) {
+            configuration.getQueryParams().forEach((k, v) -> queryParams.put(k, List.of(extractValue(v, sources))));
         }
 
         Map<String, Object> pathVariables = new HashMap<>();
-        if (configuration.getPathVariables() != null) {
-            configuration.getPathVariables().forEach((k, v) -> pathVariables.put(k, IntegrationUtils.extractValue(v, sources)));
+        if (Objects.nonNull(configuration.getPathVariables())) {
+            configuration.getPathVariables().forEach((k, v) -> pathVariables.put(k, extractValue(v, sources)));
         }
 
-        Object body = IntegrationUtils.getValueFromConfig(configuration.getBody(), sources);
+        Object body = getValueFromConfig(configuration.getBody(), sources);
 
         return ApiRequest.builder()
                 .url(configuration.getUrl())

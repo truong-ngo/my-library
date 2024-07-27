@@ -1,8 +1,12 @@
 package com.nxt.lib.utils;
 
+import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+
+import java.util.Optional;
 
 /**
  * Spring Expression Language utility
@@ -19,12 +23,16 @@ public class SpElUtils {
      * Get value base on SpEl expression from given context
      * @param expression: SpEl expression as extractor
      * @param context: extraction's context
-     * @return value extracted as {@link Object} type
+     * @return value extracted as {@code Optional} of {@link Object} type
      * */
-    public static Object getValue(String expression, Object context) {
-        ExpressionParser parser = new SpelExpressionParser();
-        Expression exp = parser.parseExpression(expression);
-        return exp.getValue(context);
+    public static Optional<Object> getValue(String expression, Object context) {
+        try {
+            ExpressionParser parser = new SpelExpressionParser();
+            Expression exp = parser.parseExpression(expression);
+            return Optional.ofNullable(exp.getValue(context));
+        } catch (ParseException | EvaluationException | IllegalAccessError e) {
+            return Optional.empty();
+        }
     }
 
     /**
@@ -32,11 +40,15 @@ public class SpElUtils {
      * @param expression: SpEl expression as extractor
      * @param context: extraction's context
      * @param clazz: return type
-     * @return value extracted as {@link T} type
+     * @return optional of {@link T} type
      * */
-    public static <T> T getValue(String expression, Object context, Class<T> clazz) {
-        ExpressionParser parser = new SpelExpressionParser();
-        Expression exp = parser.parseExpression(expression);
-        return exp.getValue(context, clazz);
+    public static <T> Optional<T> getValue(String expression, Object context, Class<T> clazz) {
+        try {
+            ExpressionParser parser = new SpelExpressionParser();
+            Expression exp = parser.parseExpression(expression);
+            return Optional.ofNullable(exp.getValue(context, clazz));
+        } catch (ParseException | EvaluationException | IllegalAccessError e) {
+            return Optional.empty();
+        }
     }
 }
