@@ -8,6 +8,7 @@ import java.util.Map;
 
 /**
  * Validation result
+ * @author Truong Ngo
  * */
 @Data
 @NoArgsConstructor
@@ -15,12 +16,14 @@ import java.util.Map;
 public class ValidationResult {
 
     /**
-     * Is valid result ?
+     * Indicate that the validation result is success or failed
      * */
     private boolean isValid;
 
     /**
      * Message in case failure
+     * <p>
+     * Contain the all the field is invalid during the validation process
      * */
     private Map<String, Object> messages;
 }

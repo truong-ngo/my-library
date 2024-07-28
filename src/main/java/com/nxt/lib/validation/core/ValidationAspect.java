@@ -14,8 +14,9 @@ import java.util.Map;
 /**
  * Intercept method invocation to perform validation
  * <p>
- * The method that annotated with {@code @Validated} will be intercepted, and be validated in here
+ * The method that annotated with {@code @Validated} will be intercepted and validated in here
  * @see Validated
+ * @see Valid
  * @author Truong Ngo
  * */
 @Aspect
@@ -23,11 +24,18 @@ import java.util.Map;
 public class ValidationAspect {
 
     /**
-     * Entry point that intercept method annotated with {@code Validated} annotation
+     * Entry point that intercept method annotated with {@code Validated} annotation and perform validation
+     * <p>
+     * Find the method that annotated with {@code Validated} in the invocation chain
+     * (invoke only through dependency injection), if exist a method then find the
+     * parameter annotated with {@code @Valid} and pass the parameter and rule
+     * configuration to the {@code ValidationExecutor} to perform validation
+     * @see ValidationExecutor
      * @throws ValidationException if method parameter is validation is failed
      * */
     @Before("@annotation(com.nxt.lib.validation.core.Validated)")
     public void validate(JoinPoint joinPoint) {
+
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
         Object[] args = joinPoint.getArgs();
@@ -37,13 +45,12 @@ public class ValidationAspect {
             for (Annotation annotation : parameterAnnotations[i]) {
                 if (annotation instanceof Valid validAnnotation) {
                     String path = validAnnotation.rule();
-                    RuleConfiguration rule = IOUtils.getResource(path, RuleConfiguration.class)
-                            .orElseThrow(() -> new ValidationException(Map.of("rulePath", "invalid rule path or rule path not found!")));
-                    rule.checkFormat();
+                    RuleConfiguration rule = IOUtils
+                            .getResource(path, RuleConfiguration.class)
+                            .orElseThrow(() -> new ValidationException(Map.of("rulePath", "invalid rule path or rule not found!")));
+                    rule.checkFormat(); // Ensure that the configuration is valid
                     ValidationResult result = new ValidationExecutor(rule, args[i]).validate();
-                    if (!result.isValid()) {
-                        throw new ValidationException(result.getMessages());
-                    }
+                    if (!result.isValid()) throw new ValidationException(result.getMessages());
                 }
             }
         }
