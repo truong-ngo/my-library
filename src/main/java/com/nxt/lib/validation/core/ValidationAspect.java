@@ -24,14 +24,18 @@ import java.util.Map;
 public class ValidationAspect {
 
     /**
-     * Entry point that intercept method annotated with {@code Validated} annotation and perform validation
+     * Entry point that intercept method annotated with {@code Validated} annotation
+     * and perform validation
      * <p>
      * Find the method that annotated with {@code Validated} in the invocation chain
      * (invoke only through dependency injection), if exist a method then find the
      * parameter annotated with {@code @Valid} and pass the parameter and rule
      * configuration to the {@code ValidationExecutor} to perform validation
+     * <p>
+     * If the validation process success then continue to invoke the method otherwise
+     * throw {@code ValidationException} along with all the invalid field and message
      * @see ValidationExecutor
-     * @throws ValidationException if method parameter is validation is failed
+     * @throws ValidationException if method parameter validation is failed
      * */
     @Before("@annotation(com.nxt.lib.validation.core.Validated)")
     public void validate(JoinPoint joinPoint) {
@@ -47,7 +51,9 @@ public class ValidationAspect {
                     String path = validAnnotation.rule();
                     RuleConfiguration rule = IOUtils
                             .getResource(path, RuleConfiguration.class)
-                            .orElseThrow(() -> new ValidationException(Map.of("rulePath", "invalid rule path or rule not found!")));
+                            .orElseThrow(() -> new ValidationException(Map.of(
+                                    ValidationUtils.RULE_KEY,
+                                    ValidationUtils.INVALID_RULE_MESSAGE)));
                     rule.checkFormat(); // Ensure that the configuration is valid
                     ValidationResult result = new ValidationExecutor(rule, args[i]).validate();
                     if (!result.isValid()) throw new ValidationException(result.getMessages());
