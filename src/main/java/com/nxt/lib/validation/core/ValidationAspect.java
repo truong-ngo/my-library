@@ -1,6 +1,5 @@
 package com.nxt.lib.validation.core;
 
-import com.nxt.lib.utils.IOUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Map;
 
 /**
  * Intercept method invocation to perform validation
@@ -49,11 +47,7 @@ public class ValidationAspect {
             for (Annotation annotation : parameterAnnotations[i]) {
                 if (annotation instanceof Valid validAnnotation) {
                     String path = validAnnotation.rule();
-                    RuleConfiguration rule = IOUtils
-                            .getResource(path, RuleConfiguration.class)
-                            .orElseThrow(() -> new ValidationException(Map.of(
-                                    ValidationUtils.RULE_KEY,
-                                    ValidationUtils.INVALID_RULE_MESSAGE)));
+                    RuleConfiguration rule = ValidationUtils.getRuleConfiguration(path);
                     rule.checkFormat(); // Ensure that the configuration is valid
                     ValidationResult result = new ValidationExecutor(rule, args[i]).validate();
                     if (!result.isValid()) throw new ValidationException(result.getMessages());

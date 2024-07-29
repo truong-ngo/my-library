@@ -6,6 +6,7 @@ import java.util.Map;
 
 /**
  * Exception throws during the validation process
+ * @author Truong Ngo
  * */
 @Getter
 public class ValidationException extends RuntimeException {

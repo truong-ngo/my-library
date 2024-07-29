@@ -8,15 +8,15 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Hold the validation logic of a parameter
+ * Hold the validation logic of a validation object, and it's field
  * <p>
- * Java class model for rule configuration file define in {@code @Valid}.
+ * Java class model for rule define in {@code @Valid}.
  * <p>
- * Describe the validation logic of entire object as below:
+ * Describe the validation rule of entire object with three case:
  * <ul>
  *     <li>Basic case: Single field validation</li>
  *     <li>Composite case: Group of field validation with combine operator</li>
- *     <li>Array case: Contain the path of array element validation rule</li>
+ *     <li>Array case: Indicate the rule configuration for member is array</li>
  * </ul>
  * @see Valid
  * @author Truong Ngo
@@ -25,13 +25,22 @@ import java.util.Objects;
 public class RuleConfiguration {
 
     /**
+     * Indicate that the configuration is root or not
+     * */
+    public Boolean isRoot;
+
+    /**
      * Indicate the target that need to be validated. Can be:
      * <ul>
      *     <li>A rule of single field</li>
-     *     <li>A group of rule</li>
+     *     <li>A group of rule (and & or)</li>
      *     <li>Conditional rule</li>
      * </ul>
      * of object that need to be validated
+     * <p>
+     * In most case, target is field name of validated object but in or case the
+     * field name is represent more than one field. E.g: if the rule is group of rule
+     * (especially in or case) the target may be like 'fieldA&fieldB'
      * */
     private String target;
 
@@ -41,7 +50,8 @@ public class RuleConfiguration {
     private String targetName;
 
     /**
-     * Rule message, indicate how the target should be
+     * Rule message, describe how the target value should match<br>
+     * Use as response message in case validation failed
      * */
     private String message;
 
@@ -58,15 +68,18 @@ public class RuleConfiguration {
     private String ruleExpression;
 
     /**
-     * Indicate the configuration of array element in case field is array<br/>
-     * This is rule for array member
+     * Indicate the configuration of array element in case field type is array<br/>
+     * This is rule for array member, all member must match the validation define
+     * in this field
      * */
     private String arrayElementConfig;
 
     /**
      * Combine type for rule in the composite form
+     * <p>
+     * For the rule group format, check the {@link RuleGroupType} to see detail
      * */
-    private RuleCombineType combineType;
+    private RuleGroupType groupType;
 
     /**
      * Child rule, this is the composite form of rule
@@ -74,30 +87,41 @@ public class RuleConfiguration {
     private List<RuleConfiguration> subRules;
 
     /**
+     * Check if configuration is root
+     * */
+    public boolean isRoot() {
+        return Objects.nonNull(isRoot) && isRoot;
+    }
+
+    /**
      * Determine if rule is in basic form
+     * @return true if {@link #ruleExpression} is not null and other case configuration is null
      * */
     public boolean isBasicConfiguration() {
         return (!StringUtils.isTrimEmpty(ruleExpression)) &&
                (Objects.isNull(arrayElementConfig)) &&
-               (Objects.isNull(combineType) && Objects.isNull(subRules));
+               (Objects.isNull(groupType) && Objects.isNull(subRules));
     }
 
     /**
      * Determine if rule is in array form
+     * @return true if {@link #arrayElementConfig} is not null and other case configuration is null
      * */
     public boolean isArrayConfiguration() {
         return (Objects.isNull(ruleExpression)) &&
                (Objects.nonNull(arrayElementConfig)) &&
-               (Objects.isNull(combineType) && Objects.isNull(subRules));
+               (Objects.isNull(groupType) && Objects.isNull(subRules));
     }
 
     /**
      * Determine if rule is in composite form
+     * @return true if {@link #groupType} and {@link #subRules} is not null and other
+     * case configuration is null
      * */
     public boolean isCompositeConfiguration() {
         return (Objects.isNull(ruleExpression)) &&
                (Objects.isNull(arrayElementConfig)) &&
-               (Objects.nonNull(combineType) && Objects.nonNull(subRules));
+               (Objects.nonNull(groupType) && Objects.nonNull(subRules));
     }
 
     /**
@@ -106,24 +130,88 @@ public class RuleConfiguration {
      * */
     public void checkFormat() {
         if (!isBasicConfiguration() && !isArrayConfiguration() && !isCompositeConfiguration()) {
-            throw new ValidationException(Map.of("message", "invalid rule configuration format"));
+            throw new ValidationException(Map.of(
+                    ValidationUtils.RULE_FORMAT_KEY,
+                    ValidationUtils.INVALID_RULE_FORMAT_MESSAGE));
         }
     }
 
     /**
      * Combine type enum
+     * <p>
+     * Only use in group rule
      * */
-    public enum RuleCombineType {
+    public enum RuleGroupType {
 
+        /**
+         * And group. Use for and & condition case
+         * <p>
+         * And case indicate that target must match all the rules define like:
+         * <blockquote><pre>
+         * {
+         *      "groupType": AND
+         *      "subRules": [
+         *          {
+         *              "ruleExpression": expression a
+         *          },
+         *          {
+         *              "ruleExpression": expression b
+         *          }
+         *          ...
+         *          other rule
+         *      ]
+         * }
+         * </pre></blockquote>
+         * <p>
+         * Conditional case describe for conditional validation for specific target. E.g. like:
+         * <blockquote><pre>
+         * {
+         *      "groupType": AND
+         *      "subRules": [
+         *          {
+         *              "condition": a // if condition a
+         *              "ruleExpression": expression a
+         *          },
+         *          {
+         *              "condition": b // else if condition b
+         *              "ruleExpression": expression b
+         *          }
+         *          ...
+         *          other case
+         *      ]
+         * }
+         * </pre></blockquote>
+         * The message return is contain only message of rule that not valid among those rule
+         * */
         AND,
-        OR,
-        CONDITION;
 
+        /**
+         * Or group. Indicate that the target of rule is only need to match one among the rules define like:
+         * <blockquote><pre>
+         * {
+         *      "groupType": OR
+         *      "subRules": [
+         *          {
+         *              "ruleExpression": expression a
+         *          },
+         *          {
+         *              "ruleExpression": expression b
+         *          }
+         *          ...
+         *          other rule
+         *      ]
+         * }
+         * </pre></blockquote>
+         * The message return must contain all the message of those rules
+         * */
+        OR;
+
+        /**
+         * Check if group type is and or not
+         * @return true if type is AND
+         * */
         public boolean isAnd() {
             return this.equals(AND);
-        }
-        public boolean isCondition() {
-            return this.equals(CONDITION);
         }
     }
 }
