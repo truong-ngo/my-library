@@ -25,11 +25,6 @@ import java.util.Objects;
 public class RuleConfiguration {
 
     /**
-     * Indicate that the configuration is root or not
-     * */
-    public Boolean isRoot;
-
-    /**
      * Indicate the target that need to be validated. Can be:
      * <ul>
      *     <li>A rule of single field</li>
@@ -56,8 +51,14 @@ public class RuleConfiguration {
     private String message;
 
     /**
-     * A SpEl expression indicate that the validation is applied or not<br/>
-     * If the value is null or true then the validation will be applied
+     * A SpEl expression indicate that the validation is applied or not. If the value is null or
+     * true then the validation will be applied
+     * <p>
+     * Note that {@code condition} is different with {@link #isConditional}.
+     * {@code condition} indicate that the rule is applied or not while {@code isConditional}
+     * only place in group rule of and indicate if the one of rule in group has match condition
+     * then applied that rule (like switch - case)
+     * @see #isConditional
      * */
     private String condition;
 
@@ -82,16 +83,18 @@ public class RuleConfiguration {
     private RuleGroupType groupType;
 
     /**
+     * A child case of group rule of and
+     * <p>
+     * Indicate that only one rule in group with right {@code condition} is validated,
+     * also help to define the error message correctly for that group
+     * @see #condition
+     * */
+    public Boolean isConditional;
+
+    /**
      * Child rule, this is the composite form of rule
      * */
     private List<RuleConfiguration> subRules;
-
-    /**
-     * Check if configuration is root
-     * */
-    public boolean isRoot() {
-        return Objects.nonNull(isRoot) && isRoot;
-    }
 
     /**
      * Determine if rule is in basic form

@@ -16,6 +16,11 @@ public class ValidationUtils {
     /**
      * Rule key constant
      * */
+    public static final String MESSAGE_KEY = "message";
+
+    /**
+     * Rule key constant
+     * */
     public static final String RULE_KEY = "rule";
 
     /**
@@ -44,6 +49,11 @@ public class ValidationUtils {
     public static final String INVALID_CONDITION_SYNTAX_PATTERN = "Invalid rule condition syntax: %s!";
 
     /**
+     * Header message for or case validation when validation failed
+     * */
+    public static final String HEADER_MESSAGE_FOR_OR_CASE_PATTERN = "%s must match at least one of these rule below:";
+
+    /**
      * Resolve condition of rule
      * @param config the rule config
      * @param context object to extract value
@@ -55,7 +65,7 @@ public class ValidationUtils {
                 SpElUtils
                         .getValue(config.getCondition(), context, Boolean.class)
                         .orElseThrow(() -> new ValidationException(Map.of(
-                                config.getTargetName(),
+                                config.getTarget(),
                                 String.format(INVALID_CONDITION_SYNTAX_PATTERN, config.getCondition())
                         )));
     }

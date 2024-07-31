@@ -1,52 +1,46 @@
 {
-    "ruleName": "Organization validation",
-    "combineType": "AND",
+    "isRoot": true,
+    "groupType": "AND",
     "subRules": [
         {
-            "combineType": "OR",
-            "fieldName": "organization",
+            "groupType": "OR",
+            "target": "orgName & orgCode",
             "subRules": [
                 {
-                    "ruleName": "Organization's name validation",
-                    "fieldName": "orgName",
+                    "target": "orgName",
                     "message": "orgName must be not null",
                     "ruleExpression": "orgName != null"
                 },
                 {
-                    "ruleName": "Organization's code validation",
-                    "fieldName": "orgCode",
+                    "target": "orgCode",
                     "message": "orgCode must be not null",
                     "ruleExpression": "orgCode != null"
                 }
             ]
         },
         {
-            "ruleName": "Organization's tax code validation",
-            "fieldName": "taxCode",
+            "target": "taxCode",
             "message": "taxCode must be not null",
             "ruleExpression": "taxCode != null"
         },
         {
-            "ruleName": "Organization's address validation",
-            "fieldName": "address",
+            "target": "address",
             "message": "address must be not null",
             "ruleExpression": "address != null"
         },
         {
-            "ruleName": "Organization's departments validation",
-            "combineType": "AND",
+            "target": "departments",
+            "groupType": "AND",
             "subRules": [
                 {
-                    "fieldName": "departments",
+                    "target": "departments",
                     "message": "departments must be not null and departments size >= 1",
                     "ruleExpression": "departments != null && departments.size() >= 1"
                 },
                 {
-                    "ruleName": "Department validation",
-                    "fieldName": "departments",
+                    "target": "departments",
                     "condition": "departments != null && departments.size() >= 1",
-                    "isArray": true,
-                    "arrayElementConfigPath": "validation/department.json"
+                    "arrayElementConfig": "validation/department.json"
                 }
             ]
         }

@@ -1,34 +1,30 @@
 {
-    "ruleName": "Department validation",
-    "combineType": "AND",
+    "isRoot": true,
+    "groupType": "AND",
     "subRules": [
         {
-            "ruleName": "Department's name validation",
-            "fieldName": "name",
+            "target": "name",
             "message": "name must be not null",
             "ruleExpression": "name != null"
         },
         {
-            "ruleName": "Department's max size validation",
-            "fieldName": "maxSize",
+            "target": "maxSize",
             "message": "maxSize must be not null and between 1 and 30",
             "ruleExpression": "maxSize != null && maxSize >= 1 && maxSize <= 30"
         },
         {
-            "ruleName": "Department's employees validation",
-            "combineType": "AND",
+            "target": "employees",
+            "groupType": "AND",
             "subRules": [
                 {
-                    "fieldName": "employees",
+                    "target": "employees",
                     "message": "employees must be not null and not empty",
                     "ruleExpression": "employees != null && employees.size() >= 1 && employees.size() <= maxSize"
                 },
                 {
-                    "ruleName": "Employee validation",
-                    "fieldName": "employees",
+                    "target": "employees",
                     "condition": "employees != null && employees.size() >= 1 && employees.size() <= maxSize",
-                    "isArray": true,
-                    "arrayElementConfigPath": "validation/employee.json"
+                    "arrayElementConfig": "validation/employee.json"
                 }
             ]
         }

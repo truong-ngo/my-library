@@ -16,6 +16,11 @@ import java.util.Map;
 public class ValidationResult {
 
     /**
+     * Valid result of validation process
+     * */
+    public static final ValidationResult VALID_RESULT = new ValidationResult(true, null);
+
+    /**
      * Indicate that the validation result is success or failed
      * */
     private boolean isValid;

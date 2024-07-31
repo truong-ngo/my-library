@@ -5,6 +5,7 @@ import com.nxt.lib.integration.method.MethodConfiguration;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Define a complete process include:
@@ -49,18 +50,18 @@ public class ProcessConfiguration implements OperationalConfiguration {
      * Check if integration step has pre handler api call operation
      * */
     public boolean hasPreApiCallHandler() {
-        return preApiCallHandlers != null && !preApiCallHandlers.isEmpty();
+        return Objects.nonNull(preApiCallHandlers) && !preApiCallHandlers.isEmpty();
     }
 
     /**
      * Check if integration step has handlers
      * */
     public boolean hasResponseHandlers() {
-        return responseHandlers != null && !responseHandlers.isEmpty();
+        return Objects.nonNull(responseHandlers) && !responseHandlers.isEmpty();
     }
 
     @Override
     public String getName(ValueSource source) {
-        return null;
+        return processName;
     }
 }
