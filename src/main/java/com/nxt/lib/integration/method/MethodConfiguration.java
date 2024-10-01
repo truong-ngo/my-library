@@ -3,6 +3,7 @@ package com.nxt.lib.integration.method;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nxt.lib.integration.OperationalConfiguration;
 import com.nxt.lib.integration.ValueSource;
+import com.nxt.lib.utils.StringUtils;
 import lombok.Data;
 
 import java.util.List;
@@ -37,27 +38,19 @@ public class MethodConfiguration implements OperationalConfiguration {
     private String methodName;
 
     /**
-     * Indicate list of method's parameter type
-     * */
-    private List<String> parametersType;
-
-    /**
      * Configuration for parameter
-     * <p>
-     * Key: index of parameter<br/>
-     * Value: value extractor configuration
-     * </p>
      * */
-    private Map<Integer, Object> paramsConfig;
+    private List<ParameterConfiguration> parametersConfig;
 
     /**
-     * Get method fully qualify path
+     * Get method fully qualifier path
      * <p>
      * Eg: com.nxt.utils.ClassUtils.isPrimitive(java.lang.Object)
      * </p>
      * */
     public String getMethodPath() {
-        return String.format("%s.%s(%s)", serviceType, methodName, String.join(", ", parametersType));
+        String parametersType = StringUtils.join(parametersConfig, ParameterConfiguration::getParametersType, ", ");
+        return String.format("%s.%s(%s)", serviceType, methodName, StringUtils.nvl(parametersType));
     }
 
     @Override

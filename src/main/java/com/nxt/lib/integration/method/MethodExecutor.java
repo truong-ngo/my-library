@@ -39,7 +39,7 @@ public class MethodExecutor {
             Object serviceInstance = ServiceUtils.getServiceAsObject(serviceType);
             Method method = getMethod(serviceType, config);
             if (method.getParameterCount() > 0) {
-                Object[] parameters = extractMethodParameters(method, config.getParamsConfig(), source);
+                Object[] parameters = extractMethodParameters(method, config.getParametersConfig(), source);
                 returnObject = method.invoke(serviceInstance, parameters);
             } else {
                 returnObject = method.invoke(serviceInstance);
@@ -69,11 +69,11 @@ public class MethodExecutor {
     /**
      * @return parameter's {@link Class} type
      * */
-    private Class<?>[] getParametersType(List<String> parameterTypes) {
+    private Class<?>[] getParametersType(List<ParameterConfiguration> configurations) {
         try {
-            Class<?>[] classes = new Class[parameterTypes.size()];
-            for (int i = 0; i < parameterTypes.size(); i++) {
-                classes[i] = Class.forName(parameterTypes.get(i));
+            Class<?>[] classes = new Class[configurations.size()];
+            for (ParameterConfiguration config : configurations) {
+                classes[config.getIndex()] = Class.forName(config.getParametersType());
             }
             return classes;
         } catch (ClassNotFoundException exception) {
@@ -86,7 +86,7 @@ public class MethodExecutor {
      */
     private Method getMethod(Class<?> serviceType, MethodConfiguration config) {
         try {
-            return serviceType.getMethod(config.getMethodName(), getParametersType(config.getParametersType()));
+            return serviceType.getMethod(config.getMethodName(), getParametersType(config.getParametersConfig()));
         } catch (NoSuchMethodException exception) {
             throw new IntegrationException("Method " + config.getMethodName() + " not found in service: " + config.getServiceType());
         }
@@ -96,11 +96,11 @@ public class MethodExecutor {
      * Get parameter value from {@link MethodConfiguration} and {@link ValueSource}
      * @return Array of parameters
      * */
-    private Object[] extractMethodParameters(Method method, Map<Integer, Object> configs, ValueSource source) {
+    private Object[] extractMethodParameters(Method method, List<ParameterConfiguration> configs, ValueSource source) {
         Object[] parameters = new Object[method.getParameterCount()];
-        for (Map.Entry<Integer, Object> cfg : configs.entrySet()) {
-            Object param = IntegrationUtils.getValueFromConfig(cfg.getValue(), source);
-            parameters[cfg.getKey()] = param;
+        for (ParameterConfiguration cfg : configs) {
+            Object param = IntegrationUtils.getValueFromConfig(cfg.getParamsConfig(), source);
+            parameters[cfg.getIndex()] = param;
         }
         return parameters;
     }
